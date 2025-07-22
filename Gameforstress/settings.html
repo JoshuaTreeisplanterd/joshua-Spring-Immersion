@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Cookie Click Challenge</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            text-align: center;
+            margin-top: 100px;
+            background-color: #f3e5ab;
+            color: #3e2723;
+        }
+
+        h1 {
+            font-size: 48px;
+            color: #4caf50;
+        }
+
+        .button {
+            padding: 15px 30px;
+            font-size: 20px;
+            margin: 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            background-color: #a0522d;
+            color: #fff;
+            border: none;
+            transition: 0.3s;
+        }
+
+        .button:hover {
+            background-color: #8b4513;
+        }
+
+        .button:focus {
+            outline: none;
+        }
+
+        .settings-option {
+            margin: 20px;
+            font-size: 20px;
+        }
+
+        label {
+            font-size: 22px;
+        }
+
+        #back-button {
+            background-color: #ff9800;
+        }
+
+        #save-button {
+            background-color: #4caf50;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Game Settings</h1>
+
+    <!-- Double-click option -->
+    <div class="settings-option">
+        <label for="doubleClickOption">
+            <input type="checkbox" id="doubleClickOption"> Enable Double-Click (Boost clicks)
+        </label>
+    </div>
+
+    <!-- Sound effects option -->
+    <div class="settings-option">
+        <label for="soundOption">
+            <input type="checkbox" id="soundOption"> Enable Sound Effects
+        </label>
+    </div>
+
+    <button class="button" id="save-button" onclick="saveSettings()">Save Settings</button>
+    <button class="button" id="back-button" onclick="window.location.href = 'index.html';">Back to Menu</button>
+
+    <script>
+        // Fetch saved settings from localStorage and set the checkboxes accordingly
+        document.getElementById('doubleClickOption').checked = JSON.parse(localStorage.getItem("doubleClickEnabled") || "false");
+        document.getElementById('soundOption').checked = JSON.parse(localStorage.getItem("soundEnabled") || "true");
+
+        // Save the current settings to localStorage
+        function saveSettings() {
+            const isDoubleClickEnabled = document.getElementById('doubleClickOption').checked;
+            const isSoundEnabled = document.getElementById('soundOption').checked;
+
+            // Save the settings to localStorage
+            localStorage.setItem("doubleClickEnabled", isDoubleClickEnabled);
+            localStorage.setItem("soundEnabled", isSoundEnabled);
+
+            alert('Settings Saved!');
+        }
+    </script>
+
+</body>
+</html>

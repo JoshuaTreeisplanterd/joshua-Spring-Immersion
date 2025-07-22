@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cookie Click Challenge - Menu</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            text-align: center;
+            background-color: #f3e5ab;
+            margin-top: 100px;
+            color: #3e2723;
+        }
+
+        h1 {
+            font-size: 48px;
+            color: #4caf50;
+        }
+
+        .button {
+            padding: 15px 30px;
+            font-size: 20px;
+            margin: 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            background-color: #a0522d;
+            color: #fff;
+            border: none;
+            transition: 0.3s;
+        }
+
+        .button:hover {
+            background-color: #8b4513;
+        }
+
+        .button:focus {
+            outline: none;
+        }
+
+        #highscore {
+            margin-top: 30px;
+            font-size: 22px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🍪 Cookie Click Challenge</h1>
+    
+    <button class="button" onclick="window.location.href = 'game.html';">Play Game</button>
+    <button class="button" onclick="showHighScore()">View High Score</button>
+    <button class="button" onclick="window.location.href = 'settings.html';">Settings</button>
+
+    <div id="highscore"></div>
+
+    <script>
+        function showHighScore() {
+            let highScore = localStorage.getItem("cookieHighScore");
+            const scoreText = highScore ? `🏆 High Score: ${highScore} clicks` : '🏆 No high score yet – go set one!';
+            document.getElementById('highscore').textContent = scoreText;
+        }
+
+        // Show high score immediately on page load
+        showHighScore();
+    </script>
+    
+</body>
+</html>

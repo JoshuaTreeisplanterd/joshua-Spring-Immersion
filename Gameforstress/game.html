@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cookie Clicker Game</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            text-align: center;
+            margin-top: 50px;
+            background-color: #f3e5ab;
+        }
+
+        #timer {
+            font-size: 20px;
+            color: #d32f2f;
+            margin-top: 20px;
+        }
+
+        #clickCount {
+            font-weight: bold;
+            font-size: 28px;
+            color: #3e2723;
+        }
+
+        #targetNumber {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4caf50;
+            margin-top: 20px;
+        }
+
+        #highScore {
+            font-size: 18px;
+            color: #795548;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 18px;
+            margin: 10px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            background-color: #a0522d;
+            color: #fff;
+            box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        #cookie-timer {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🍪 Cookie Clicker Game</h1>
+
+    <p>Click the cookie button to match the target number!</p>
+    <p>Click the button below to go back to the  Main Menu .</p>
+
+    <!-- Button to go back to index.html -->
+    <button onclick="goBackToIndex()">Go Back to Main Menu</button>
+
+
+    <div id="cookie-timer">⏱ Time Elapsed: <span id="timer">00:00</span></div>
+    <p>Click Count: <span id="clickCount">0</span></p>
+    <p id="targetNumber">Target Number: ???</p>
+    <p id="highScore"></p>
+
+    <!-- Game Buttons -->
+    <button onclick="handleClick()" id="click-button">Click Me 🍪</button>
+    <button onclick="resetGame()">Reset Game</button>
+    
+
+    <p id="winMessage"></p>
+    <p id="loseMessage"></p>
+
+    <script>
+        
+        let clickCount = 0;
+        let targetNumber = Math.floor(Math.random() * 101) + 50;  // Random target between 50 and 150
+        let startTime;
+        let elapsedTime = 0;
+        let timerInterval;
+        let gameOver = false;
+        let highScore = localStorage.getItem("cookieHighScore"); // Fetch the saved high score
+
+        // Update high score on the page
+        function updateHighScoreDisplay() {
+            if (highScore) {
+                document.getElementById("highScore").textContent = `🏆 Best Time: ${highScore}s`;
+            } else {
+                document.getElementById("highScore").textContent = `🏆 No high score yet. Try your best!`;
+            }
+        }
+
+        // Format time to MM:SS
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+        }
+
+        // Update the timer every second
+        function updateTimer() {
+            elapsedTime = (Date.now() - startTime) / 1000;
+            document.getElementById("timer").textContent = formatTime(elapsedTime);
+        }
+
+        // Start the timer
+        function startTimer() {
+            startTime = Date.now() - elapsedTime; // Allow the timer to continue from the previous state
+            timerInterval = setInterval(updateTimer, 1000); // Update every second
+        }
+
+        // Handle cookie click action
+        function handleClick() {
+            if (gameOver) return; // Prevent clicking when game is over
+            clickCount += 1;
+            document.getElementById("clickCount").textContent = clickCount;
+
+            // Check if the user has reached the target
+            if (clickCount === targetNumber) {
+                clearInterval(timerInterval); // Stop the timer
+                gameOver = true;
+                document.getElementById("winMessage").textContent = `🎉 You win! Time taken: ${formatTime(elapsedTime)}`;
+
+                // Check and update high score
+                if (!highScore || elapsedTime < parseFloat(highScore)) {
+                    highScore = elapsedTime.toFixed(2); // Update high score
+                    localStorage.setItem("cookieHighScore", highScore); // Save to localStorage
+                    document.getElementById("winMessage").textContent += " 🥇 New Best Time!";
+                }
+
+                updateHighScoreDisplay(); // Update the displayed high score
+            }
+        }
+
+        // Reset the game
+        function resetGame() {
+            clickCount = 0;
+            targetNumber = Math.floor(Math.random() * 101) + 50; // Reset the target number
+            document.getElementById("clickCount").textContent = clickCount;
+            document.getElementById("targetNumber").textContent = `Target Number: ${targetNumber}`;
+            gameOver = false;
+            document.getElementById("winMessage").textContent = "";
+            document.getElementById("loseMessage").textContent = "";
+
+            // Restart the timer
+            elapsedTime = 0;
+            document.getElementById("timer").textContent = "00:00";
+            startTimer();
+
+            // Re-enable the click button
+            document.getElementById("click-button").disabled = false;
+        }
+
+        // Go back to the menu (for now, it just reloads the page)
+        
+            
+        function goBackToIndex() {
+            window.location.href = 'index.html'; }
+
+        // Initialize the game
+        function initializeGame() {
+            updateHighScoreDisplay(); // Display high score
+            document.getElementById("targetNumber").textContent = `Target Number: ${targetNumber}`; // Display target number
+            startTimer(); // Start the timer when the game is loaded
+        }
+
+        // Run the game setup
+        initializeGame();
+    </script>
+
+</body>
+</html>
