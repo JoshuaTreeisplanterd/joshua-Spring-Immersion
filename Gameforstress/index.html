@@ -1,69 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cookie Click Challenge - Menu</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            text-align: center;
-            background-color: #f3e5ab;
-            margin-top: 100px;
-            color: #3e2723;
-        }
-
-        h1 {
-            font-size: 48px;
-            color: #4caf50;
-        }
-
-        .button {
-            padding: 15px 30px;
-            font-size: 20px;
-            margin: 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            background-color: #a0522d;
-            color: #fff;
-            border: none;
-            transition: 0.3s;
-        }
-
-        .button:hover {
-            background-color: #8b4513;
-        }
-
-        .button:focus {
-            outline: none;
-        }
-
-        #highscore {
-            margin-top: 30px;
-            font-size: 22px;
-        }
-    </style>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cookie Click Challenge – Menu</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f3e5ab url('https://www.transparenttextures.com/patterns/cookies.png');
+      text-align: center; padding: 40px; color: #3e2723;
+    }
+    h1 { font-size: 2.8em; margin-bottom: 10px; }
+    button { padding: 15px 30px; font-size: 18px; background: #a0522d; color: white; border: none; border-radius: 8px; cursor: pointer; margin: 10px; box-shadow: 2px 2px 6px rgba(0,0,0,0.2); }
+    button:hover { background-color: #8b4513; }
+    .info { font-size: 1.2em; margin: 20px 0; }
+    .tutorial { background: #fff8dc; border: 2px dashed #a0522d; padding: 20px; margin: 30px auto; border-radius: 8px; max-width: 600px; text-align: left; }
+    .tutorial h2 { margin-top: 0; }
+    .tutorial li { margin-bottom: 8px; }
+  </style>
 </head>
 <body>
 
-    <h1>🍪 Cookie Click Challenge</h1>
-    
-    <button class="button" onclick="window.location.href = 'game.html';">Play Game</button>
-    <button class="button" onclick="showHighScore()">View High Score</button>
-    <button class="button" onclick="window.location.href = 'settings.html';">Settings</button>
+  <h1>Clicker Challenge</h1>
+  <p class="info" id="saved-level">Loading your progress…</p>
 
-    <div id="highscore"></div>
+  <button onclick="startGame()">▶️ Continue Game</button>
+  <button onclick="startNewGame()">🔄 New Game</button>
+  <button onclick="openLevelSelect()">🎯 Select Level</button>
 
-    <script>
-        function showHighScore() {
-            let highScore = localStorage.getItem("cookieHighScore");
-            const scoreText = highScore ? `🏆 High Score: ${highScore} clicks` : '🏆 No high score yet – go set one!';
-            document.getElementById('highscore').textContent = scoreText;
-        }
+  <div class="tutorial">
+    <h2>📘 How to Play</h2>
+    <ul>
+      <li>Click the "Click Me" button until your count reaches or exceeds the target number.</li>
+      <li>Beat the target before time runs out</li>
+      <li>You automatically progress to the next level after clearing the target.</li>
+      <li>Your fastest time is saved as your High Score.</li>
+      <li>Use "Select Level" to jump to any level directly.</li>
+    </ul>
+  </div>
 
-        // Show high score immediately on page load
-        showHighScore();
-    </script>
-    
+  <script>
+    function startGame() { window.location.href = 'game.html'; }
+    function startNewGame() {
+      localStorage.removeItem('savedLevel');
+      localStorage.removeItem('cookieHighScore');
+      window.location.href = 'game.html';
+    }
+    function openLevelSelect() { window.location.href = 'levels.html'; }
+
+    const lvl = localStorage.getItem('savedLevel') || 1;
+    document.getElementById('saved-level').textContent = `📌 Last saved level: Level ${lvl}`;
+  </script>
 </body>
 </html>

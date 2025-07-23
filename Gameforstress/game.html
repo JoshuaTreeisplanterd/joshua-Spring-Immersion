@@ -1,179 +1,214 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cookie Clicker Game</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            text-align: center;
-            margin-top: 50px;
-            background-color: #f3e5ab;
-        }
-
-        #timer {
-            font-size: 20px;
-            color: #d32f2f;
-            margin-top: 20px;
-        }
-
-        #clickCount {
-            font-weight: bold;
-            font-size: 28px;
-            color: #3e2723;
-        }
-
-        #targetNumber {
-            font-size: 24px;
-            font-weight: bold;
-            color: #4caf50;
-            margin-top: 20px;
-        }
-
-        #highScore {
-            font-size: 18px;
-            color: #795548;
-        }
-
-        button {
-            padding: 12px 24px;
-            font-size: 18px;
-            margin: 10px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            background-color: #a0522d;
-            color: #fff;
-            box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.3);
-        }
-
-        #cookie-timer {
-            font-size: 24px;
-            margin-bottom: 10px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title> Clicker Challenge – Game</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      text-align: center;
+      padding-top: 60px;
+      background-color: #f3e5ab;
+      color: #3e2723;
+      transition: background-color 0.4s;
+    }
+    button {
+      padding: 12px 24px;
+      margin: 5px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background: #a0522d;
+      color: white;
+      cursor: pointer;
+      box-shadow: 2px 2px 6px rgba(0,0,0,0.3);
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    #targetNumber, #level-display, #clickCount, #high-score, #wait-message {
+      margin: 10px;
+      font-weight: bold;
+      font-size: 20px;
+    }
+    #game-timer {
+      font-size: 18px;
+      color: #d32f2f;
+    }
+    #win-message {
+      color: #4caf50;
+      font-size: 22px;
+    }
+    #lose-message {
+      color: #e53935;
+      font-size: 22px;
+    }
+  </style>
 </head>
 <body>
 
-    <h1>🍪 Cookie Clicker Game</h1>
+<h1> Clicker Challenge</h1>
+<p id="level-display">Level: 1</p>
+<p id="wait-message">⏳ Get ready...</p>
+<div id="targetNumber">Target Number: ???</div>
 
-    <p>Click the cookie button to match the target number!</p>
-    <p>Click the button below to go back to the  Main Menu .</p>
+<button onclick="handleClick()" id="click-button" disabled>Click Me</button>
+<button onclick="pauseResume()" id="pause-btn">Pause</button>
+<button onclick="restartGame()">Restart</button>
+<button onclick="goToMenu()">Back to Menu</button>
+<button onclick="showTutorial()">Tutorial</button>
 
-    <!-- Button to go back to index.html -->
-    <button onclick="goBackToIndex()">Go Back to Main Menu</button>
+<p>Click Count: <span id="clickCount">0</span></p>
+<p id="game-timer">Time: 00:00</p>
+<p id="win-message"></p>
+<p id="lose-message"></p>
+<p id="high-score"></p>
 
+<!-- Tutorial Modal -->
+<div id="tutorial" style="display:none; background:#fff8dc; border:2px dashed #a0522d; margin:20px auto; padding:20px; max-width:500px;">
+  <h2>📘 How to Play</h2>
+  <ul>
+    <li>A target number will appear after a short countdown.</li>
+    <li>Click the button until your count reaches or goes above the target before time runs out.</li>
+    <li>You will automatically move to the next level.</li>
+    <li>Pause the game anytime using the Pause button.</li>
+  </ul>
+  <button onclick="hideTutorial()">Close Tutorial</button>
+</div>
 
-    <div id="cookie-timer">⏱ Time Elapsed: <span id="timer">00:00</span></div>
-    <p>Click Count: <span id="clickCount">0</span></p>
-    <p id="targetNumber">Target Number: ???</p>
-    <p id="highScore"></p>
+<script>
+  let level = parseInt(localStorage.getItem('savedLevel')) || 1;
+  let targetNumber, clickCount = 0, timeLeft, maxTime;
+  let paused = false, gameOver = false;
+  let countdownInterval, waitTimeout;
+  let highScore = localStorage.getItem('cookieHighScore');
+  let gameStartTime, elapsedTime = 0;
 
-    <!-- Game Buttons -->
-    <button onclick="handleClick()" id="click-button">Click Me 🍪</button>
-    <button onclick="resetGame()">Reset Game</button>
-    
+  function updateDisplay() {
+    document.getElementById('level-display').textContent = `Level: ${level}`;
+    document.getElementById('clickCount').textContent = clickCount;
+    document.getElementById('high-score').textContent = highScore
+      ? `🏆 Best Time: ${highScore}s`
+      : '🏆 No best time yet';
+  }
 
-    <p id="winMessage"></p>
-    <p id="loseMessage"></p>
+  function formatTime(seconds) {
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  }
 
-    <script>
-        
-        let clickCount = 0;
-        let targetNumber = Math.floor(Math.random() * 101) + 50;  // Random target between 50 and 150
-        let startTime;
-        let elapsedTime = 0;
-        let timerInterval;
-        let gameOver = false;
-        let highScore = localStorage.getItem("cookieHighScore"); // Fetch the saved high score
+  function generateTarget() {
+    targetNumber = Math.floor(Math.random() * 101) + 50;
+    maxTime = targetNumber > 100 ? 60 : 30;
+    timeLeft = maxTime;
+    document.getElementById('targetNumber').textContent = `Target Number: ${targetNumber}`;
+    document.getElementById('click-button').disabled = false;
+    document.getElementById('wait-message').textContent = '';
+    gameStartTime = Date.now();
+    startTimer();
+  }
 
-        // Update high score on the page
-        function updateHighScoreDisplay() {
-            if (highScore) {
-                document.getElementById("highScore").textContent = `🏆 Best Time: ${highScore}s`;
-            } else {
-                document.getElementById("highScore").textContent = `🏆 No high score yet. Try your best!`;
-            }
-        }
+  function startWaitCountdown() {
+    let wait = 3;
+    document.getElementById('wait-message').textContent = `⏳ New level starts in ${wait}...`;
+    document.getElementById('click-button').disabled = true;
+    const waitInterval = setInterval(() => {
+      wait--;
+      document.getElementById('wait-message').textContent = `⏳ New level starts in ${wait}...`;
+      if (wait <= 0) {
+        clearInterval(waitInterval);
+        generateTarget();
+      }
+    }, 1000);
+  }
 
-        // Format time to MM:SS
-        function formatTime(seconds) {
-            const minutes = Math.floor(seconds / 60);
-            const remainingSeconds = seconds % 60;
-            return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
-        }
+  function startTimer() {
+    clearInterval(countdownInterval);
+    countdownInterval = setInterval(() => {
+      if (paused || gameOver) return;
+      timeLeft--;
+      elapsedTime = (Date.now() - gameStartTime) / 1000;
+      document.getElementById('game-timer').textContent = `Time: ${formatTime(elapsedTime)}`;
+      if (timeLeft <= 0) {
+        clearInterval(countdownInterval);
+        gameOver = true;
+        document.getElementById('click-button').disabled = true;
+        document.getElementById('lose-message').textContent = "⏰ Time's up!";
+      }
+    }, 1000);
+  }
 
-        // Update the timer every second
-        function updateTimer() {
-            elapsedTime = (Date.now() - startTime) / 1000;
-            document.getElementById("timer").textContent = formatTime(elapsedTime);
-        }
+  function handleClick() {
+    if (paused || gameOver) return;
+    clickCount++;
+    document.getElementById('clickCount').textContent = clickCount;
 
-        // Start the timer
-        function startTimer() {
-            startTime = Date.now() - elapsedTime; // Allow the timer to continue from the previous state
-            timerInterval = setInterval(updateTimer, 1000); // Update every second
-        }
+    if (clickCount >= targetNumber) {
+      gameOver = true;
+      clearInterval(countdownInterval);
+      elapsedTime = (Date.now() - gameStartTime) / 1000;
+      document.getElementById('win-message').textContent =
+        `🎉 You passed Level ${level} in ${formatTime(elapsedTime)}!`;
 
-        // Handle cookie click action
-        function handleClick() {
-            if (gameOver) return; // Prevent clicking when game is over
-            clickCount += 1;
-            document.getElementById("clickCount").textContent = clickCount;
+      if (!highScore || elapsedTime < parseFloat(highScore)) {
+        highScore = elapsedTime.toFixed(2);
+        localStorage.setItem('cookieHighScore', highScore);
+        document.getElementById('win-message').textContent += " 🥇 New Best!";
+      }
 
-            // Check if the user has reached the target
-            if (clickCount === targetNumber) {
-                clearInterval(timerInterval); // Stop the timer
-                gameOver = true;
-                document.getElementById("winMessage").textContent = `🎉 You win! Time taken: ${formatTime(elapsedTime)}`;
+      level++;
+      localStorage.setItem('savedLevel', level);
 
-                // Check and update high score
-                if (!highScore || elapsedTime < parseFloat(highScore)) {
-                    highScore = elapsedTime.toFixed(2); // Update high score
-                    localStorage.setItem("cookieHighScore", highScore); // Save to localStorage
-                    document.getElementById("winMessage").textContent += " 🥇 New Best Time!";
-                }
+      setTimeout(() => {
+        startNewLevel();
+      }, 3000);
+    }
+  }
 
-                updateHighScoreDisplay(); // Update the displayed high score
-            }
-        }
+  function startNewLevel() {
+    clickCount = 0;
+    gameOver = false;
+    document.getElementById('clickCount').textContent = '0';
+    document.getElementById('win-message').textContent = '';
+    document.getElementById('lose-message').textContent = '';
+    updateDisplay();
+    startWaitCountdown();
+  }
 
-        // Reset the game
-        function resetGame() {
-            clickCount = 0;
-            targetNumber = Math.floor(Math.random() * 101) + 50; // Reset the target number
-            document.getElementById("clickCount").textContent = clickCount;
-            document.getElementById("targetNumber").textContent = `Target Number: ${targetNumber}`;
-            gameOver = false;
-            document.getElementById("winMessage").textContent = "";
-            document.getElementById("loseMessage").textContent = "";
+  function pauseResume() {
+    paused = !paused;
+    document.getElementById('pause-btn').textContent = paused ? 'Resume' : 'Pause';
+  }
 
-            // Restart the timer
-            elapsedTime = 0;
-            document.getElementById("timer").textContent = "00:00";
-            startTimer();
+  function restartGame() {
+    level = 1;
+    clickCount = 0;
+    gameOver = false;
+    paused = false;
+    localStorage.setItem('savedLevel', 1);
+    startNewLevel();
+  }
 
-            // Re-enable the click button
-            document.getElementById("click-button").disabled = false;
-        }
+  function goToMenu() {
+    window.location.href = 'index.html';
+  }
 
-        // Go back to the menu (for now, it just reloads the page)
-        
-            
-        function goBackToIndex() {
-            window.location.href = 'index.html'; }
+  function showTutorial() {
+    document.getElementById('tutorial').style.display = 'block';
+  }
 
-        // Initialize the game
-        function initializeGame() {
-            updateHighScoreDisplay(); // Display high score
-            document.getElementById("targetNumber").textContent = `Target Number: ${targetNumber}`; // Display target number
-            startTimer(); // Start the timer when the game is loaded
-        }
+  function hideTutorial() {
+    document.getElementById('tutorial').style.display = 'none';
+  }
 
-        // Run the game setup
-        initializeGame();
-    </script>
-
+  // On load
+  window.onload = () => {
+    updateDisplay();
+    startWaitCountdown();
+  };
+</script>
 </body>
 </html>

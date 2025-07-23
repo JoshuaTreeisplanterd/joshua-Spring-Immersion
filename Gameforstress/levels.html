@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Select Level – Cookie Click Challenge</title>
+<style>
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #f3e5ab;
+    color: #3e2723;
+    text-align: center;
+    padding: 50px;
+  }
+  h1 { margin-bottom: 20px; }
+  .grid {
+    display: flex; flex-wrap: wrap; gap: 15px;
+    justify-content: center;
+  }
+  .grid button {
+    width: 80px; height: 60px;
+    font-size: 18px; border: none; border-radius: 8px;
+    background: #a0522d; color: white; cursor: pointer;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+    transition: transform 0.2s;
+  }
+  .grid button:hover { transform: scale(1.1); background: #8b4513; }
+  button.back {
+    margin-top: 30px; padding: 10px 20px;
+    font-size: 16px; background: #6d4c41; border-radius: 8px;
+  }
+</style>
+</head>
+<body>
+
+<h1>🍪 Select a Level</h1>
+<div class="grid" id="level-buttons"></div>
+<button class="back" onclick="goBack()">🔙 Back to Menu</button>
+
+<script>
+  const maxLevel = 20;
+  const container = document.getElementById('level-buttons');
+  for (let i = 1; i <= maxLevel; i++) {
+    const btn = document.createElement('button');
+    btn.innerText = i;
+    btn.onclick = () => {
+      localStorage.setItem('savedLevel', i);
+      window.location.href = 'game.html';
+    };
+    container.appendChild(btn);
+  }
+
+  function goBack() {
+    window.location.href = 'index.html';
+  }
+</script>
+
+</body>
+</html>
